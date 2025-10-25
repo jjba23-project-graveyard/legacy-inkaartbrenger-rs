@@ -23,3 +23,17 @@ edition = "2021"
 [dependencies]
 # For coloring terminal output
 ansi_term = "0.12.1"
+# Async runtime and utilities
+tokio = { version = "1", features = ["full"] }
+# Async HTTP client
+reqwest = { version = "0.12", features = ["rustls-tls"] }
+# HTML parsing with CSS selectors
+scraper = "0.19.0"
+# URL parsing and normalization
+url = "2.5.2"
+# Fast XML reading/writing
+quick-xml = { version = "0.35", features = ["serialize"] }
+# Command-line argument parsing
+clap = { version = "4.5.8", features = ["derive"] }
+# Terminal spinners and progress bars
+indicatif = "0.17.8"

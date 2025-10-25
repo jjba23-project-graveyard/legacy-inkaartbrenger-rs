@@ -16,4 +16,8 @@
 # along with the-site-crawler.  If not, see <https://www.gnu.org/licenses/>.
 
 run:
-    cargo run
+    cargo run -- --url https://jointhefreeworld.org
+run-wikimusic:
+    cargo run -- --url https://wikimusic.jointhefreeworld.org    
+run-byggsteg:
+    cargo run -- --url https://byggsteg.jointhefreeworld.org    
