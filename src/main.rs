@@ -16,22 +16,22 @@
   You should have received a copy of the GNU Affero General Public License
   along with the-site-crawler.  If not, see <https://www.gnu.org/licenses/>.
 */
+pub mod crawl;
+pub mod domain;
+pub mod sitemap;
+
+use crate::domain::{CrawlerState, SiteCrawlError};
+use crate::sitemap::generate_sitemap;
 use ansi_term::Colour;
 use clap::Parser;
+use crawl::crawl_url;
 use indicatif::{ProgressBar, ProgressStyle};
-use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
-use quick_xml::writer::Writer;
+
 use reqwest::Client;
-use scraper::{Html, Selector};
 use std::collections::{HashSet, VecDeque};
-use std::fmt;
-use std::fs::File;
-use std::io::BufWriter;
-use std::io::Write;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::task::JoinSet;
-use tokio::time::sleep;
 use url::Url;
 
 /// A simple CLI to crawl a website and generate a sitemap.xml
@@ -47,30 +47,9 @@ struct Args {
     concurrency: usize,
 }
 
-/// Shared state for the crawler
-struct CrawlerState {
-    links_to_visit: Mutex<VecDeque<Url>>,
-    visited_links: Mutex<HashSet<Url>>,
-    sitemap_urls: Mutex<HashSet<String>>,
-    base_domain: String,
-}
-
 fn log_intro() {
     println!("");
-    println!("{}", Colour::Green.paint("---------------------"));
-    println!("{}", Colour::Green.paint("the-sitemap-crawler"));
-    println!("{}", Colour::Green.paint("---------------------"));
-}
-
-#[derive(Debug, Clone)]
-struct SiteCrawlError {
-    cause: String,
-}
-
-impl fmt::Display for SiteCrawlError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error ocurred: {}", &self.cause)
-    }
+    println!("{}", Colour::Green.bold().paint("\nthe-sitemap-crawler\n"));
 }
 
 #[tokio::main]
@@ -203,125 +182,6 @@ async fn main() -> Result<(), SiteCrawlError> {
         Colour::Green.bold().paint("✔ Success!"),
         "sitemap.xml generated."
     );
-
-    Ok(())
-}
-
-/// Fetches a single URL, parses it for links, and adds new, valid links to the queue
-async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
-    sleep(Duration::from_millis(400)).await;
-
-    // Add to sitemap. We'll clean up fragments (#) later
-    state.sitemap_urls.lock().unwrap().insert(url.to_string());
-
-    let response = match client.get(url.clone()).send().await {
-        Ok(res) => res,
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to fetch {}: {}",
-                Colour::Red.paint("Error:"),
-                url,
-                e
-            );
-            return;
-        }
-    };
-
-    if !response.status().is_success() {
-        eprintln!(
-            "\n{} Got status {} for {}",
-            Colour::Yellow.paint("Warn:"),
-            response.status(),
-            url
-        );
-        return;
-    }
-
-    let body = match response.text().await {
-        Ok(text) => text,
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to read body from {}: {}",
-                Colour::Red.paint("Error:"),
-                url,
-                e
-            );
-            return;
-        }
-    };
-
-    let document = Html::parse_document(&body);
-    let link_selector = Selector::parse("a[href]").unwrap();
-
-    for element in document.select(&link_selector) {
-        if let Some(href) = element.value().attr("href") {
-            // Try to parse the link relative to the current page's URL
-            match url.join(href) {
-                Ok(mut new_url) => {
-                    // Remove fragments (e.g., #section)
-                    new_url.set_fragment(None);
-
-                    // Check if it's on the same domain
-                    if new_url.domain() == Some(&state.base_domain) {
-                        // --- Start of critical section ---
-                        let visited = state.visited_links.lock().unwrap();
-                        let mut queue = state.links_to_visit.lock().unwrap();
-
-                        if !visited.contains(&new_url) && !queue.contains(&new_url) {
-                            queue.push_back(new_url);
-                        }
-                        // --- End of critical section ---
-                    }
-                }
-                Err(_) => {
-                    // Invalid link, e.g., "mailto:foo@bar.com" or "javascript:..."
-                }
-            }
-        }
-    }
-    // Optional: Add logging here if you want to see links found per page
-    // if new_links_found > 0 {
-    //    println!("\nFound {} new links on {}", new_links_found, url);
-    // }
-}
-
-/// Writes all discovered URLs to a sitemap.xml file
-fn generate_sitemap(state: Arc<CrawlerState>) -> Result<(), Box<dyn std::error::Error>> {
-    let file = File::create("sitemap.xml")?;
-    let buf_writer = BufWriter::new(file);
-    let mut writer = Writer::new(buf_writer);
-
-    // Write XML declaration
-    writer.write_event(Event::Decl(quick_xml::events::BytesDecl::new(
-        "1.0",
-        Some("UTF-8"),
-        None,
-    )))?;
-
-    // Start <urlset>
-    let mut urlset = BytesStart::new("urlset");
-    urlset.push_attribute(("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9"));
-    writer.write_event(Event::Start(urlset))?;
-
-    let urls = state.sitemap_urls.lock().unwrap();
-    for url_str in urls.iter() {
-        // Start <url>
-        writer.write_event(Event::Start(BytesStart::new("url")))?;
-
-        // <loc>...</loc>
-        writer.write_event(Event::Start(BytesStart::new("loc")))?;
-        writer.write_event(Event::Text(BytesText::new(url_str)))?;
-        writer.write_event(Event::End(BytesEnd::new("loc")))?;
-
-        // End <url>
-        writer.write_event(Event::End(BytesEnd::new("url")))?;
-    }
-
-    // End <urlset>
-    writer.write_event(Event::End(BytesEnd::new("urlset")))?;
-
-    // Flush writer
-    writer.into_inner().flush()?;
 
     Ok(())
 }
