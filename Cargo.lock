@@ -737,6 +737,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "inkaartbrenger"
+version = "0.1.0"
+dependencies = [
+ "ansi_term",
+ "clap",
+ "indicatif",
+ "quick-xml",
+ "reqwest",
+ "scraper",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "ipnet"
 version = "2.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1692,20 +1706,6 @@ dependencies = [
  "futf",
  "mac",
  "utf-8",
-]
-
-[[package]]
-name = "the_site_crawler"
-version = "0.1.0"
-dependencies = [
- "ansi_term",
- "clap",
- "indicatif",
- "quick-xml",
- "reqwest",
- "scraper",
- "tokio",
- "url",
 ]
 
 [[package]]
