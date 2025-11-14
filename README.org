@@ -1,3 +1,57 @@
-* inkaartbrenger
+* 🗺️ inkaartbrenger
 
-[WIP] Web crawler and sitemap generator written in Rust.
+*inkaartbrenger* is a fast, concurrent command-line utility written in *Rust* for crawling a website and automatically generating a  =sitemap.xml= file.
+
+It's designed to be efficient and leverages *Tokio* for asynchronous operations and concurrent crawling tasks.
+
+--------------
+
+** ✨ Features
+- *Fast & Concurrent:* Uses Rust's asynchronous runtime (Tokio) and a  configurable number of concurrent tasks to crawl pages quickly.
+- *Domain Scoped:* Only crawls links belonging to the initial base  domain, preventing accidental wandering across the web.
+- *Standard Sitemap:* Generates a valid =sitemap.xml= file at the root of the execution directory.
+- *Progress Indication:* Provides a clear progress spinner and status updates in the terminal.
+- *Simple CLI:* Easy to use with minimal required arguments.
+
+--------------
+
+** 🚀 Installation and Usage
+*** Prerequisites
+You must have the *Rust toolchain* installed. If you don't, you can install it from [[https://www.rust-lang.org/tools/install][rust-lang.org]].
+Alternatively, a Guix package, and a Nix flake are provided in the repository.
+
+*** Command-Line Arguments
+
+| Flag | Full Argument | Description                                                                | Default |
+|------+---------------+----------------------------------------------------------------------------+---------|
+| =-u=   | =--url=         | *The base URL* to start crawling from (e.g., =https://example.com=). *Required.* | N/A     |
+| =-c=   | =--concurrency= | Number of concurrent crawler tasks to run.                                 | =3=       |
+
+After the crawl is complete, the =sitemap.xml= file will be generated in the same directory where the command was run.
+
+--------------
+
+** 🛠️ Project Structure and Dependencies
+This project relies on several key Rust crates for its functionality:
+
+- *=tokio=*: The asynchronous runtime for concurrent web crawling.
+- *=reqwest=*: An asynchronous HTTP client for fetching web pages.
+- *=clap=*: Used for building the command-line interface.
+- *=url=*: For robust URL parsing and manipulation.
+- *=scraper=*: Used for parsing HTML content and extracting links.
+- *=quick-xml=*: Used for efficient creation of the =sitemap.xml= file.
+- *=indicatif= / =ansi_term=*: For the nice-looking terminal progress
+  bar and colored output.
+
+--------------
+
+** ⚖️ License
+This project is licensed under the *GNU Affero General Public License (AGPL) v3.0 or any later version*.
+
+A copy of the license is included in the source code files. For more details, see the [[https://www.gnu.org/licenses/agpl-3.0.html][GNU Affero General Public License]].
+
+--------------
+
+** 💡 Contributing
+
+Contributions are welcome! If you find a bug or have a suggestion, please open an issue or submit a pull request.
