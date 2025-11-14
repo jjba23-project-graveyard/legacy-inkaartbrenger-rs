@@ -1,12 +1,18 @@
-* 🗺️ inkaartbrenger
+#+title:  🗺️ inkaartbrenger
+#+author: Josep Bigorra
+#+email: jjbigorra@gmail.com
+#+options: toc:nil num:nil
+
+[[https://jointhefreeworld.org/ggg/dist/license-agpl3+.svg]]    [[https://jointhefreeworld.org/ggg/dist/license-fdl13+.svg]]
 
 *inkaartbrenger* is a fast, concurrent command-line utility written in *Rust* for crawling a website and automatically generating a  =sitemap.xml= file.
 
-It's designed to be efficient and leverages *Tokio* for asynchronous operations and concurrent crawling tasks.
+If you like my work, please support me by [[https://bmc.link/jjbigorra][buying me a cup of coffee ☕]] so I can continue with a lot of motivation.
+
 
 --------------
 
-** ✨ Features
+* ✨ Features
 - *Fast & Concurrent:* Uses Rust's asynchronous runtime (Tokio) and a  configurable number of concurrent tasks to crawl pages quickly.
 - *Domain Scoped:* Only crawls links belonging to the initial base  domain, preventing accidental wandering across the web.
 - *Standard Sitemap:* Generates a valid =sitemap.xml= file at the root of the execution directory.
@@ -15,12 +21,19 @@ It's designed to be efficient and leverages *Tokio* for asynchronous operations 
 
 --------------
 
-** 🚀 Installation and Usage
-*** Prerequisites
-You must have the *Rust toolchain* installed. If you don't, you can install it from [[https://www.rust-lang.org/tools/install][rust-lang.org]].
-Alternatively, a Guix package, and a Nix flake are provided in the repository.
+* 🚀 Installation and Usage
 
-*** Command-Line Arguments
+You must have the *Rust toolchain* installed. If you don't, you can install it from [[https://www.rust-lang.org/tools/install][rust-lang.org]].
+
+A ~guix.scm~ and ~manifest.scm~ are provided with the project, making it the integration with Guix seamless.
+
+A ~Justfile~ is provided with the project, and it contains some common tasks and utilities, and can be useful to learn how to use this project.
+
+For the Nix crew, a flake is also provided.
+
+If you want to hack on the project, it's useful to have an ~.envrc~ with either ~use guix~ or ~use flake~.
+
+** Command-Line Arguments
 
 | Flag | Full Argument | Description                                                                | Default |
 |------+---------------+----------------------------------------------------------------------------+---------|
@@ -29,11 +42,9 @@ Alternatively, a Guix package, and a Nix flake are provided in the repository.
 
 After the crawl is complete, the =sitemap.xml= file will be generated in the same directory where the command was run.
 
-A ~Justfile~ is provided with the project, and it contains some common tasks and utilities, and can be useful to learn how to use this project.
-
 --------------
 
-** 🛠️ Project Structure and Dependencies
+* 🛠️ Project Structure and Dependencies
 This project relies on several key Rust crates for its functionality:
 
 - *=tokio=*: The asynchronous runtime for concurrent web crawling.
@@ -47,13 +58,30 @@ This project relies on several key Rust crates for its functionality:
 
 --------------
 
-** ⚖️ License
-This project is licensed under the *GNU Affero General Public License (AGPL) v3.0 or any later version*.
+* Licensing
 
-A copy of the license is included in the source code files. For more details, see the [[https://www.gnu.org/licenses/agpl-3.0.html][GNU Affero General Public License]].
+inkaartbrenger and all of its source code are free software, licensed under the GNU Affero General Public License v3 (or newer at your convenience).
 
---------------
+https://www.gnu.org/licenses/agpl-3.0.html
 
-** 💡 Contributing
+The documentation and examples, including this document, which are provided with inkaartbrenger, are all licensed under the GNU Free Documentation License v1.3 (or newer at your convenience).
+
+https://www.gnu.org/licenses/fdl-1.3.html
+  
+
+----------
+
+* Code of conduct
+
+This project adheres to the jointhefreeworld code of conduct. Find it here:
+
+https://jointhefreeworld.org/blog/articles/personal/jointhefreeworld-code-of-conduct/index.html
+
+In summary, we foster an inclusive, respectful, and cooperative environment for all contributors and users of this free software project. Inspired by the ideals of the GNU Project, we strive to uphold freedom, equality, and community as guiding principles. We believe that collaboration in a community of mutual respect is essential to creating excellent free software.
+
+---------
+
+* 💡 Contributing
 
 Contributions are welcome! If you find a bug or have a suggestion, please open an issue or submit a pull request.
+
