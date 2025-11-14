@@ -29,6 +29,8 @@ Alternatively, a Guix package, and a Nix flake are provided in the repository.
 
 After the crawl is complete, the =sitemap.xml= file will be generated in the same directory where the command was run.
 
+A ~Justfile~ is provided with the project, and it contains some common tasks and utilities, and can be useful to learn how to use this project.
+
 --------------
 
 ** 🛠️ Project Structure and Dependencies

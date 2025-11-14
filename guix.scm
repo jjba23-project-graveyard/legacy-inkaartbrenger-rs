@@ -15,7 +15,6 @@
 ;; You should have received a copy of the GNU Affero General Public License
 ;; along with inkaartbrenger. If not, see <https://www.gnu.org/licenses/>.
 
-
 (use-modules (guix gexp)
              (guix packages)
              (guix import crate)
@@ -40,9 +39,11 @@
                  #:select? (git-predicate %source-dir)))
     (build-system cargo-build-system)
     (native-inputs (list pkg-config))
-    (inputs (cons* openssl (cargo-inputs-from-lockfile "Cargo.lock")))
+    (inputs (cons* openssl
+                   (cargo-inputs-from-lockfile "Cargo.lock")))
     (arguments
-      `(#:install-source? #f))
+     `(#:install-source? #f
+       #:tests? #f))
     (home-page "https://codeberg.org/jjba23/inkaartbrenger")
     (synopsis "")
     (description "")
