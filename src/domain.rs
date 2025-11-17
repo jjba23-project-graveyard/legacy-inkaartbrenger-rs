@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with inkaartbrenger.  If not, see <https://www.gnu.org/licenses/>.
 */
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::fmt;
 use std::sync::Mutex;
 use url::Url;
@@ -37,5 +37,12 @@ pub struct CrawlerState {
     pub links_to_visit: Mutex<VecDeque<Url>>,
     pub visited_links: Mutex<HashSet<Url>>,
     pub sitemap_urls: Mutex<HashSet<String>>,
+    pub last_modified: Mutex<HashMap<Url, String>>,
     pub base_domain: String,
+}
+
+#[derive(Eq, Hash, PartialEq)]
+pub struct SiteMapTarget {
+    pub url: Url,
+    pub last_modified: Result<Option<String>, chrono::ParseError>,
 }

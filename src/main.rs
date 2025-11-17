@@ -28,7 +28,7 @@ use crawl::crawl_url;
 use indicatif::{ProgressBar, ProgressStyle};
 
 use reqwest::Client;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::task::JoinSet;
@@ -74,6 +74,7 @@ async fn main() -> Result<(), SiteCrawlError> {
         links_to_visit: Mutex::new(initial_links),
         visited_links: Mutex::new(HashSet::new()),
         sitemap_urls: Mutex::new(HashSet::new()),
+        last_modified: Mutex::new(HashMap::new()),
         base_domain: domain_name,
     });
 

@@ -19,9 +19,9 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, ParseError, Utc};
 use reqwest::header::LAST_MODIFIED;
-use reqwest::Client;
+use reqwest::{Client, Response};
 use scraper::{Html, Selector};
 use std::sync::Arc;
 use std::time::Duration;
@@ -58,8 +58,27 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
         return;
     }
 
-    let body = match response.text().await {
-        Ok(text) => text,
+    let maybe_last_modified: Option<String> = get_last_modified_date_from_response(&response)
+        .inspect_err(|e| {
+            eprintln!(
+                "\n{} Failed to read last modified header from {}: {}",
+                Colour::Red.paint("Error:"),
+                url,
+                e
+            )
+        })
+        .unwrap_or(None);
+
+    maybe_last_modified.inspect(|last_modified| {
+        state
+            .last_modified
+            .lock()
+            .unwrap()
+            .insert(url.clone(), last_modified.to_string());
+    });
+
+    let body: String = match response.text().await {
+        Ok(text) => text.to_string(),
         Err(e) => {
             eprintln!(
                 "\n{} Failed to read body from {}: {}",
@@ -106,19 +125,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
     // }
 }
 
-/// Fetches the Last-Modified header from a URL using a HEAD request.
-/// Returns Ok(Some(DateTime<Utc>)) if the header is present and valid,
-/// Ok(None) if the header is missing, and Err on request/network failure.
-async fn get_last_modified_date(url: &str) -> Result<Option<String>, String> {
-    // Send a HEAD request
-    let client = reqwest::Client::new();
-    let response = client.head(url).send().await.map_err(|e| e.to_string())?;
-
-    // Check if the request was successful
-    if !response.status().is_success() {
-        return Err(format!("Request failed with status: {}", response.status()));
-    }
-
+fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>, ParseError> {
     // Retrieve the 'Last-Modified' header
     let last_modified_header = response.headers().get(LAST_MODIFIED);
 
@@ -126,25 +133,14 @@ async fn get_last_modified_date(url: &str) -> Result<Option<String>, String> {
         Some(header_value) => {
             let header_str = header_value.to_str().unwrap_or_default();
 
-            // Parse the HTTP date string (RFC 7231 format)
-            // The format is typically "%a, %d %b %Y %H:%M:%S GMT" (e.g., "Wed, 21 Oct 2015 07:28:00 GMT")
             match DateTime::parse_from_rfc2822(header_str) {
-                Ok(datetime) => {
-                    // Convert to UTC for a standardized representation
-                    Ok(Some(format!(
-                        "{}",
-                        datetime.with_timezone(&Utc).format("%Y-%m-%d")
-                    )))
-                }
-                Err(_) => {
-                    // Return None if the header is present but malformed
-                    Ok(None)
-                }
+                Ok(datetime) => Ok(Some(format!(
+                    "{}",
+                    datetime.with_timezone(&Utc).format("%Y-%m-%d")
+                ))),
+                Err(cause) => Err(cause),
             }
         }
-        None => {
-            // Header was not present in the response
-            Ok(None)
-        }
+        None => Ok(None),
     }
 }
