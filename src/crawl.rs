@@ -19,6 +19,8 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
+use chrono::{DateTime, Utc};
+use reqwest::header::LAST_MODIFIED;
 use reqwest::Client;
 use scraper::{Html, Selector};
 use std::sync::Arc;
@@ -102,4 +104,47 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
     // if new_links_found > 0 {
     //    println!("\nFound {} new links on {}", new_links_found, url);
     // }
+}
+
+/// Fetches the Last-Modified header from a URL using a HEAD request.
+/// Returns Ok(Some(DateTime<Utc>)) if the header is present and valid,
+/// Ok(None) if the header is missing, and Err on request/network failure.
+async fn get_last_modified_date(url: &str) -> Result<Option<String>, String> {
+    // Send a HEAD request
+    let client = reqwest::Client::new();
+    let response = client.head(url).send().await.map_err(|e| e.to_string())?;
+
+    // Check if the request was successful
+    if !response.status().is_success() {
+        return Err(format!("Request failed with status: {}", response.status()));
+    }
+
+    // Retrieve the 'Last-Modified' header
+    let last_modified_header = response.headers().get(LAST_MODIFIED);
+
+    match last_modified_header {
+        Some(header_value) => {
+            let header_str = header_value.to_str().unwrap_or_default();
+
+            // Parse the HTTP date string (RFC 7231 format)
+            // The format is typically "%a, %d %b %Y %H:%M:%S GMT" (e.g., "Wed, 21 Oct 2015 07:28:00 GMT")
+            match DateTime::parse_from_rfc2822(header_str) {
+                Ok(datetime) => {
+                    // Convert to UTC for a standardized representation
+                    Ok(Some(format!(
+                        "{}",
+                        datetime.with_timezone(&Utc).format("%Y-%m-%d")
+                    )))
+                }
+                Err(_) => {
+                    // Return None if the header is present but malformed
+                    Ok(None)
+                }
+            }
+        }
+        None => {
+            // Header was not present in the response
+            Ok(None)
+        }
+    }
 }
