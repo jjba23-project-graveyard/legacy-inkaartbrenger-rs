@@ -3,7 +3,7 @@
 #+email: jjbigorra@gmail.com
 #+options: toc:nil num:nil
 
-[[https://jointhefreeworld.org/ggg/dist/license-agpl3+.svg]]    [[https://jointhefreeworld.org/ggg/dist/license-fdl13+.svg]]
+[[https://jointhefreeworld.org/ggg/dist/rust-185+.svg]] [[https://jointhefreeworld.org/ggg/dist/cargo.svg]] [[https://jointhefreeworld.org/ggg/dist/license-agpl3+.svg]]    [[https://jointhefreeworld.org/ggg/dist/license-fdl13+.svg]]
 
 *inkaartbrenger* is a fast, concurrent command-line utility written in *Rust* for crawling a website and automatically generating a  =sitemap.xml= file.
 
