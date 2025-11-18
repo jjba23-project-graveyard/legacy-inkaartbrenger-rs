@@ -13,11 +13,19 @@ If you like my work, please support me by [[https://bmc.link/jjbigorra][buying m
 --------------
 
 * ✨ Features
-- *Fast & Concurrent:* Uses Rust's asynchronous runtime (Tokio) and a  configurable number of concurrent tasks to crawl pages quickly.
 - *Domain Scoped:* Only crawls links belonging to the initial base  domain, preventing accidental wandering across the web.
-- *Standard Sitemap:* Generates a valid =sitemap.xml= file at the root of the execution directory.
+- *Standard Sitemap:* Generates a valid =sitemap.xml= that is standards-compliant, at the root of the execution directory.
+- *Fast & Concurrent:* Uses Rust's asynchronous runtime (Tokio) and a  configurable number of concurrent tasks to crawl pages quickly.
 - *Progress Indication:* Provides a clear progress spinner and status updates in the terminal.
 - *Simple CLI:* Easy to use with minimal required arguments.
+
+* What are sitemaps?  
+
+Read more about the sitemap protocol here: https://www.sitemaps.org/protocol.html
+
+Sitemaps are an easy way for webmasters to inform search engines about pages on their sites that are available for crawling. In its simplest form, a Sitemap is an XML file that lists URLs for a site along with additional metadata about each URL (when it was last updated, how often it usually changes, and how important it is, relative to other URLs in the site) so that search engines can more intelligently crawl the site.
+
+Web crawlers usually discover pages from links within the site and from other sites. Sitemaps supplement this data to allow crawlers that support Sitemaps to pick up all URLs in the Sitemap and learn about those URLs using the associated metadata. Using the Sitemap protocol does not guarantee that web pages are included in search engines, but provides hints for web crawlers to do a better job of crawling your site.
 
 --------------
 

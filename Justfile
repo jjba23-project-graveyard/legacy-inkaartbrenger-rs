@@ -22,5 +22,5 @@ run:
 #     cargo run -- --url https://wikimusic.jointhefreeworld.org    
 # run-byggsteg:
 #     cargo run -- --url https://byggsteg.jointhefreeworld.org    
-# run-artanis:
-#     cargo run -- --url https://artanis.dev
+run-artanis:
+    cargo run -- --url https://artanis.dev
