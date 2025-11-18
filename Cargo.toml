@@ -37,3 +37,5 @@ quick-xml = { version = "0.35", features = ["serialize"] }
 clap = { version = "4.5.8", features = ["derive"] }
 # Terminal spinners and progress bars
 indicatif = "0.17.8"
+# Date-time
+chrono = { version = "0.4", features = ["serde"] }

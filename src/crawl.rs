@@ -19,7 +19,9 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
-use reqwest::Client;
+use chrono::{DateTime, ParseError, Utc};
+use reqwest::header::LAST_MODIFIED;
+use reqwest::{Client, Response};
 use scraper::{Html, Selector};
 use std::sync::Arc;
 use std::time::Duration;
@@ -56,8 +58,27 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
         return;
     }
 
-    let body = match response.text().await {
-        Ok(text) => text,
+    let maybe_last_modified: Option<String> = get_last_modified_date_from_response(&response)
+        .inspect_err(|e| {
+            eprintln!(
+                "\n{} Failed to read last modified header from {}: {}",
+                Colour::Red.paint("Error:"),
+                url,
+                e
+            )
+        })
+        .unwrap_or(None);
+
+    maybe_last_modified.inspect(|last_modified| {
+        state
+            .last_modified
+            .lock()
+            .unwrap()
+            .insert(url.to_string(), last_modified.to_string());
+    });
+
+    let body: String = match response.text().await {
+        Ok(text) => text.to_string(),
         Err(e) => {
             eprintln!(
                 "\n{} Failed to read body from {}: {}",
@@ -102,4 +123,24 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
     // if new_links_found > 0 {
     //    println!("\nFound {} new links on {}", new_links_found, url);
     // }
+}
+
+fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>, ParseError> {
+    // Retrieve the 'Last-Modified' header
+    let last_modified_header = response.headers().get(LAST_MODIFIED);
+
+    match last_modified_header {
+        Some(header_value) => {
+            let header_str = header_value.to_str().unwrap_or_default();
+
+            match DateTime::parse_from_rfc2822(header_str) {
+                Ok(datetime) => Ok(Some(format!(
+                    "{}",
+                    datetime.with_timezone(&Utc).format("%Y-%m-%d")
+                ))),
+                Err(cause) => Err(cause),
+            }
+        }
+        None => Ok(None),
+    }
 }
