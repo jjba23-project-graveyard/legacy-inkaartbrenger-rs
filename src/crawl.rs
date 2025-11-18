@@ -24,17 +24,11 @@ use reqwest::header::LAST_MODIFIED;
 use reqwest::{Client, Response};
 use scraper::{Html, Selector};
 use std::sync::Arc;
-use std::time::Duration;
-use tokio::time::sleep;
+
 use url::Url;
 
 /// Fetches a single URL, parses it for links, and adds new, valid links to the queue
 pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
-    sleep(Duration::from_millis(400)).await;
-
-    // Add to sitemap. We'll clean up fragments (#) later
-    state.sitemap_urls.lock().unwrap().insert(url.to_string());
-
     let response = match client.get(url.clone()).send().await {
         Ok(res) => res,
         Err(e) => {
@@ -57,6 +51,9 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
         );
         return;
     }
+
+    // Add to sitemap. We'll clean up fragments (#) later
+    state.sitemap_urls.lock().unwrap().insert(url.to_string());
 
     let maybe_last_modified: Option<String> = get_last_modified_date_from_response(&response)
         .inspect_err(|e| {
@@ -128,18 +125,13 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
 }
 
 fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>, ParseError> {
-    match response.headers().get(LAST_MODIFIED) {
-        Some(header_value) => {
-            let header_str = header_value.to_str().unwrap_or_default();
+    let Some(header_value) = response.headers().get(LAST_MODIFIED) else {
+        return Ok(None);
+    };
+    let header_str = header_value.to_str().unwrap_or_default();
+    let datetime = DateTime::parse_from_rfc2822(header_str)?;
 
-            match DateTime::parse_from_rfc2822(header_str) {
-                Ok(datetime) => Ok(Some(format!(
-                    "{}",
-                    datetime.with_timezone(&Utc).format("%Y-%m-%d")
-                ))),
-                Err(cause) => Err(cause),
-            }
-        }
-        None => Ok(None),
-    }
+    Ok(Some(
+        datetime.with_timezone(&Utc).format("%Y-%m-%d").to_string(),
+    ))
 }

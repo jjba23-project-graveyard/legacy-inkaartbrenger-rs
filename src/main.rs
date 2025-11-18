@@ -27,6 +27,8 @@ use clap::Parser;
 use crawl::crawl_url;
 use indicatif::{ProgressBar, ProgressStyle};
 
+use tokio::time::sleep;
+
 use reqwest::Client;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex};
@@ -141,7 +143,19 @@ async fn main() -> Result<(), SiteCrawlError> {
                 let client_clone = client.clone();
 
                 tasks.spawn(async move {
-                    crawl_url(client_clone, state_clone, url).await;
+                    sleep(Duration::from_millis(350)).await;
+                    if let Err(_) = tokio::time::timeout(
+                        Duration::from_millis(1200),
+                        crawl_url(client_clone, state_clone, url.clone()),
+                    )
+                    .await
+                    {
+                        eprintln!(
+                            "\n{} Timeout while crawling URL: {}",
+                            Colour::Red.paint("Error:"),
+                            url.clone()
+                        )
+                    }
                 });
             } else {
                 // We're at capacity, wait for a task to finish
