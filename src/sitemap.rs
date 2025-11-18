@@ -22,8 +22,8 @@ use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::writer::Writer;
 
 use std::fs::File;
-use std::io::BufWriter;
 use std::io::Write;
+use std::io::{self, BufWriter};
 use std::sync::Arc;
 
 /// Writes all discovered URLs to a sitemap.xml file
@@ -45,12 +45,8 @@ pub fn generate_sitemap(state: Arc<CrawlerState>) -> Result<(), Box<dyn std::err
     writer.write_event(Event::Start(urlset))?;
 
     let urls = state.sitemap_urls.lock().unwrap();
+    let last_modified = state.last_modified.lock().unwrap();
     for url_str in urls.iter() {
-        // let last_modified: Result<Option<DateTime<Utc>>, String> =
-        //     get_last_modified_date(url_str).await;
-
-        // let s = format!("last modified: {}", last_modified.unwrap().unwrap());
-        // println!("{}", s);
         // Start <url>
         writer.write_event(Event::Start(BytesStart::new("url")))?;
 
@@ -60,9 +56,12 @@ pub fn generate_sitemap(state: Arc<CrawlerState>) -> Result<(), Box<dyn std::err
         writer.write_event(Event::End(BytesEnd::new("loc")))?;
 
         // <lastmod>...</lastmod>
-        // writer.write_event(Event::Start(BytesStart::new("lastmod")))?;
-        // writer.write_event(Event::Text(BytesText::new("")));
-        // writer.write_event(Event::End(BytesEnd::new("lastmod")))?;
+        let maybe_last_modified = last_modified.get(url_str);
+        maybe_last_modified.map(|lm| {
+            writer.write_event(Event::Start(BytesStart::new("lastmod")));
+            writer.write_event(Event::Text(BytesText::new(lm)));
+            writer.write_event(Event::End(BytesEnd::new("lastmod")));
+        });
 
         // End <url>
         writer.write_event(Event::End(BytesEnd::new("url")))?;

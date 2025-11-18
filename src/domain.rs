@@ -37,7 +37,7 @@ pub struct CrawlerState {
     pub links_to_visit: Mutex<VecDeque<Url>>,
     pub visited_links: Mutex<HashSet<Url>>,
     pub sitemap_urls: Mutex<HashSet<String>>,
-    pub last_modified: Mutex<HashMap<Url, String>>,
+    pub last_modified: Mutex<HashMap<String, String>>,
     pub base_domain: String,
 }
 

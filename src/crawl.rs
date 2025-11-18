@@ -74,7 +74,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
             .last_modified
             .lock()
             .unwrap()
-            .insert(url.clone(), last_modified.to_string());
+            .insert(url.to_string(), last_modified.to_string());
     });
 
     let body: String = match response.text().await {
