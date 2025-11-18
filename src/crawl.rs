@@ -69,6 +69,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
         })
         .unwrap_or(None);
 
+    // --- Start of critical section ---
     maybe_last_modified.inspect(|last_modified| {
         state
             .last_modified
@@ -76,6 +77,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
             .unwrap()
             .insert(url.to_string(), last_modified.to_string());
     });
+    // --- End of critical section ---
 
     let body: String = match response.text().await {
         Ok(text) => text.to_string(),
@@ -126,10 +128,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
 }
 
 fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>, ParseError> {
-    // Retrieve the 'Last-Modified' header
-    let last_modified_header = response.headers().get(LAST_MODIFIED);
-
-    match last_modified_header {
+    match response.headers().get(LAST_MODIFIED) {
         Some(header_value) => {
             let header_str = header_value.to_str().unwrap_or_default();
 

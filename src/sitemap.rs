@@ -24,7 +24,6 @@ use quick_xml::writer::Writer;
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
-use std::io::{Error, ErrorKind};
 use std::sync::Arc;
 
 /// Writes all discovered URLs to a sitemap.xml file
@@ -57,16 +56,11 @@ pub fn generate_sitemap(state: Arc<CrawlerState>) -> Result<(), Box<dyn std::err
         writer.write_event(Event::End(BytesEnd::new("loc")))?;
 
         // <lastmod>...</lastmod>
-        let maybe_last_modified = last_modified.get(url_str);
-
-        match maybe_last_modified {
-            None => Ok(()),
-            Some(lm) => {
-                writer.write_event(Event::Start(BytesStart::new("lastmod")))?;
-                writer.write_event(Event::Text(BytesText::new(lm)))?;
-                writer.write_event(Event::End(BytesEnd::new("lastmod")))
-            }
-        }?;
+        if let Some(lm) = last_modified.get(url_str) {
+            writer.write_event(Event::Start(BytesStart::new("lastmod")))?;
+            writer.write_event(Event::Text(BytesText::new(lm)))?;
+            writer.write_event(Event::End(BytesEnd::new("lastmod")))?;
+        };
 
         // End <url>
         writer.write_event(Event::End(BytesEnd::new("url")))?;
