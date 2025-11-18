@@ -114,7 +114,7 @@ async fn main() -> Result<(), SiteCrawlError> {
                 tasks.spawn(async move {
                     sleep(Duration::from_millis(350)).await;
                     if let Err(_) = tokio::time::timeout(
-                        Duration::from_millis(1200),
+                        Duration::from_millis(3600),
                         crawl_url(client_clone, state_clone, url.clone()),
                     )
                     .await
@@ -123,7 +123,7 @@ async fn main() -> Result<(), SiteCrawlError> {
                             "\n{} Timeout while crawling URL: {}",
                             Colour::Red.paint("Error:"),
                             url.clone()
-                        )
+                        );
                     }
                 });
             } else {
