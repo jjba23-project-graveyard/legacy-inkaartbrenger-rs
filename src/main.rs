@@ -16,16 +16,17 @@
   You should have received a copy of the GNU Affero General Public License
   along with inkaartbrenger.  If not, see <https://www.gnu.org/licenses/>.
 */
+pub mod cli;
 pub mod crawl;
 pub mod domain;
 pub mod sitemap;
 
+use crate::cli::{log_intro, parsed_cli_args, prepare_progress_bar};
 use crate::domain::{CrawlerState, SiteCrawlError};
 use crate::sitemap::generate_sitemap;
 use ansi_term::Colour;
-use clap::Parser;
+
 use crawl::crawl_url;
-use indicatif::{ProgressBar, ProgressStyle};
 
 use tokio::time::sleep;
 
@@ -36,28 +37,10 @@ use std::time::Duration;
 use tokio::task::JoinSet;
 use url::Url;
 
-/// A simple CLI to crawl a website and generate a sitemap.xml
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// The base URL to start crawling from (e.g., https://example.com)
-    #[arg(short, long)]
-    url: String,
-
-    /// Number of concurrent crawler tasks
-    #[arg(short, long, default_value_t = 3)]
-    concurrency: usize,
-}
-
-fn log_intro() {
-    println!("");
-    println!("{}", Colour::Green.bold().paint("\ninkaartbrenger\n"));
-}
-
 #[tokio::main]
 async fn main() -> Result<(), SiteCrawlError> {
     log_intro();
-    let args = Args::parse();
+    let args = parsed_cli_args();
     let base_url = Url::parse(&args.url).map_err(|e| SiteCrawlError {
         cause: e.to_string(),
     })?;
@@ -90,21 +73,7 @@ async fn main() -> Result<(), SiteCrawlError> {
         })?;
 
     // Setup progress bar
-    let pb = ProgressBar::new_spinner();
-    pb.enable_steady_tick(Duration::from_millis(120));
-    pb.set_style(
-        ProgressStyle::with_template("{spinner:.blue} {msg}")
-            .unwrap()
-            .tick_strings(&[
-                "▹▹▹▹▹",
-                "▸▹▹▹▹",
-                "▹▸▹▹▹",
-                "▹▹▸▹▹",
-                "▹▹▹▸▹",
-                "▹▹▹▹▸",
-                "▪▪▪▪▪",
-            ]),
-    );
+    let pb = prepare_progress_bar();
     pb.set_message("Crawling...");
 
     let mut tasks = JoinSet::new();
