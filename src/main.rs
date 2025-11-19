@@ -25,6 +25,7 @@ use crate::cli::{log_intro, parsed_cli_args, prepare_progress_bar};
 use crate::domain::{CrawlerState, SiteCrawlError};
 use crate::sitemap::generate_sitemap;
 use ansi_term::Colour;
+use rand::prelude::*;
 
 use crawl::crawl_url;
 
@@ -111,10 +112,16 @@ async fn main() -> Result<(), SiteCrawlError> {
                 let state_clone = Arc::clone(&state);
                 let client_clone = client.clone();
 
+                let mut rng = rand::rng();
+                let mut nums: Vec<u64> = (1..100).collect();
+                nums.shuffle(&mut rng);
+                let random_jitter_millis = nums.choose(&mut rng).unwrap_or(&50);
+                let task_initial_delay = Duration::from_millis(250 + random_jitter_millis);
+
                 tasks.spawn(async move {
-                    sleep(Duration::from_millis(350)).await;
+                    sleep(task_initial_delay).await;
                     if let Err(_) = tokio::time::timeout(
-                        Duration::from_millis(3600),
+                        Duration::from_millis(7200),
                         crawl_url(client_clone, state_clone, url.clone()),
                     )
                     .await

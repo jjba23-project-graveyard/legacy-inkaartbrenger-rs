@@ -43,3 +43,5 @@ chrono = { version = "0.4", features = ["serde"] }
 tokio-retry2 = "0.6"
 # Errors
 anyhow = "1.0.100"
+# Random
+rand = "0.9.2"
