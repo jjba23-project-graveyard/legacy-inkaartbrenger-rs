@@ -19,41 +19,36 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, Utc};
 use reqwest::header::LAST_MODIFIED;
 use reqwest::{Client, Response};
 use scraper::{Html, Selector};
 use std::sync::Arc;
+
 use url::Url;
 
-/// Fetches a single URL, parses it for links, and adds new, valid links to the queue
-pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
-    let response = match client.get(url.clone()).send().await {
-        Ok(res) => res,
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to fetch {}: {}",
-                Colour::Red.paint("Error:"),
-                url,
-                e
-            );
-            return;
-        }
-    };
+pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) -> Result<()> {
+    let response: Response = client.get(url.clone()).send().await.inspect_err(|e| {
+        eprintln!(
+            "\n{} Failed to fetch {}: {}",
+            Colour::Red.paint("Error:"),
+            url,
+            e
+        )
+    })?;
 
-    if !response.status().is_success() {
+    if response.status().is_success() {
+        Ok(())
+    } else {
         eprintln!(
             "\n{} Got status {} for {}",
-            Colour::Yellow.paint("Warn:"),
+            Colour::Red.paint("Error:"),
             response.status(),
             url
         );
-        return;
-    }
-
-    // Add to sitemap. We'll clean up fragments (#) later
-    state.sitemap_urls.lock().unwrap().insert(url.to_string());
+        Err(anyhow!("Response status was not successful"))
+    }?;
 
     let maybe_last_modified: Option<String> = get_last_modified_date_from_response(&response)
         .inspect_err(|e| {
@@ -63,10 +58,10 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
                 url,
                 e
             )
-        })
-        .unwrap_or(None);
+        })?;
 
     // --- Start of critical section ---
+    state.sitemap_urls.lock().unwrap().insert(url.to_string());
     maybe_last_modified.inspect(|last_modified| {
         state
             .last_modified
@@ -76,31 +71,18 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
     });
     // --- End of critical section ---
 
-    let body: String = match response.text().await {
-        Ok(text) => text.to_string(),
-        Err(e) => {
-            eprintln!(
-                "\n{} Failed to read body from {}: {}",
-                Colour::Red.paint("Error:"),
-                url,
-                e
-            );
-            return;
-        }
-    };
+    let body: String = response.text().await.map(|r| r.to_string())?;
 
     let document = Html::parse_document(&body);
     let link_selector = Selector::parse("a[href]").unwrap();
 
     for element in document.select(&link_selector) {
         if let Some(href) = element.value().attr("href") {
-            // Try to parse the link relative to the current page's URL
             match url.join(href) {
                 Ok(mut new_url) => {
                     // Remove fragments (e.g., #section)
                     new_url.set_fragment(None);
 
-                    // Check if it's on the same domain
                     if new_url.domain() == Some(&state.base_domain) {
                         // --- Start of critical section ---
                         let visited = state.visited_links.lock().unwrap();
@@ -118,10 +100,8 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
             }
         }
     }
-    // Optional: Add logging here if you want to see links found per page
-    // if new_links_found > 0 {
-    //    println!("\nFound {} new links on {}", new_links_found, url);
-    // }
+
+    Ok(())
 }
 
 fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>> {
