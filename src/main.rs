@@ -113,7 +113,7 @@ async fn main() -> Result<(), SiteCrawlError> {
                 let client_clone = client.clone();
 
                 let mut rng = rand::rng();
-                let mut nums: Vec<u64> = (1..100).collect();
+                let mut nums: Vec<u64> = (1..300).collect();
                 nums.shuffle(&mut rng);
                 let random_jitter_millis = nums.choose(&mut rng).unwrap_or(&50);
                 let task_initial_delay = Duration::from_millis(250 + random_jitter_millis);
