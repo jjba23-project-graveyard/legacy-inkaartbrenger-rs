@@ -21,14 +21,15 @@ use crate::domain::CrawlerState;
 use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::writer::Writer;
 
+use anyhow::{Context, Result};
 use std::fs::File;
 use std::io::BufWriter;
 use std::io::Write;
 use std::sync::Arc;
 
 /// Writes all discovered URLs to a sitemap.xml file
-pub fn generate_sitemap(state: Arc<CrawlerState>) -> Result<(), Box<dyn std::error::Error>> {
-    let file = File::create("sitemap.xml")?;
+pub fn generate_sitemap(state: Arc<CrawlerState>) -> Result<()> {
+    let file = File::create("sitemap.xml").context("Failed to create sitemap.xml file")?;
     let buf_writer = BufWriter::new(file);
     let mut writer = Writer::new(buf_writer);
 

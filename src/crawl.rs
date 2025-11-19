@@ -19,12 +19,12 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
-use chrono::{DateTime, ParseError, Utc};
+use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
 use reqwest::header::LAST_MODIFIED;
 use reqwest::{Client, Response};
 use scraper::{Html, Selector};
 use std::sync::Arc;
-
 use url::Url;
 
 /// Fetches a single URL, parses it for links, and adds new, valid links to the queue
@@ -124,12 +124,13 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) {
     // }
 }
 
-fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>, ParseError> {
+fn get_last_modified_date_from_response(response: &Response) -> Result<Option<String>> {
     let Some(header_value) = response.headers().get(LAST_MODIFIED) else {
         return Ok(None);
     };
     let header_str = header_value.to_str().unwrap_or_default();
-    let datetime = DateTime::parse_from_rfc2822(header_str)?;
+    let datetime: DateTime<chrono::FixedOffset> = DateTime::parse_from_rfc2822(header_str)
+        .context("Failed to parse the Last-Modified header to a RFC2822 compliant date-time")?;
 
     Ok(Some(
         datetime.with_timezone(&Utc).format("%Y-%m-%d").to_string(),
