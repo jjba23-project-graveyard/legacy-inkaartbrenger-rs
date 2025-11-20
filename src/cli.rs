@@ -21,7 +21,6 @@ use clap::Parser;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::time::Duration;
 
-/// A simple CLI to crawl a website and generate a sitemap.xml
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Args {

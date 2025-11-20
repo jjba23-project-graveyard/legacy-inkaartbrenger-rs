@@ -71,10 +71,19 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) -> Re
     });
     // --- End of critical section ---
 
-    let body: String = response.text().await.map(|r| r.to_string())?;
+    let document: Html = response
+        .text()
+        .await
+        .map(|r| r.to_string())
+        .map(|s| Html::parse_document(&s))?;
 
-    let document = Html::parse_document(&body);
-    let link_selector = Selector::parse("a[href]").unwrap();
+    discover_push_links(state, url, document)?;
+
+    Ok(())
+}
+
+fn discover_push_links(state: Arc<CrawlerState>, url: Url, document: Html) -> Result<()> {
+    let link_selector = Selector::parse("a[href]").map_err(|e| anyhow!(e.to_string()))?;
 
     for element in document.select(&link_selector) {
         if let Some(href) = element.value().attr("href") {
