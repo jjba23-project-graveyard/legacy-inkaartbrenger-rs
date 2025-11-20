@@ -37,16 +37,14 @@ A ~guix.scm~ and ~manifest.scm~ are provided with the project, making it the int
 
 A ~Justfile~ is provided with the project, and it contains some common tasks and utilities, and can be useful to learn how to use this project.
 
-If you want to hack on the project with Guix, it's useful to have an ~.envrc~ with either ~use guix~.
-
-** Install with Cargo from a Local Project
+** Install with Cargo
 If you have the source code on your machine and are inside the project directory (where the Cargo.toml file is):
 
 #+begin_src shell
 cargo install --path .
 #+end_src
 
-** Install with Cargo from a Git Repository
+It installs binaries by default to ~~/.cargo/bin/~ so make sure that directory is in your ~$PATH~
 
 You can install directly from a remote Git URL without manually cloning it first:
 
@@ -54,9 +52,11 @@ You can install directly from a remote Git URL without manually cloning it first
 cargo install --git https://codeberg.org/jjba23/inkaartbrenger
 #+end_src
 
-** Installing with Guix
+** Install with Guix
 
 The project contains a ~manifest.scm~ and a ~guix.scm~ with complete Guix integration.
+
+If you want to hack on the project with Guix, it's useful to have an ~.envrc~ with either ~use guix~.
 
 A quick way to install locally can be:
 #+begin_src shell
