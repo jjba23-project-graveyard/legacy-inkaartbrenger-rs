@@ -17,20 +17,8 @@
   along with inkaartbrenger.  If not, see <https://www.gnu.org/licenses/>.
 */
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::fmt;
 use std::sync::Mutex;
 use url::Url;
-
-#[derive(Debug, Clone)]
-pub struct SiteCrawlError {
-    pub cause: String,
-}
-
-impl fmt::Display for SiteCrawlError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error ocurred: {}", &self.cause)
-    }
-}
 
 /// Shared state for the crawler
 pub struct CrawlerState {

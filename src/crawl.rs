@@ -82,7 +82,7 @@ pub async fn crawl_url(client: Client, state: Arc<CrawlerState>, url: Url) -> Re
     Ok(())
 }
 
-fn discover_push_links(state: Arc<CrawlerState>, url: Url, document: Html) -> Result<()> {
+pub fn discover_push_links(state: Arc<CrawlerState>, url: Url, document: Html) -> Result<()> {
     let link_selector = Selector::parse("a[href]").map_err(|e| anyhow!(e.to_string()))?;
 
     for element in document.select(&link_selector) {

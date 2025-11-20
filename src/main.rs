@@ -22,7 +22,7 @@ pub mod domain;
 pub mod sitemap;
 
 use crate::cli::{log_intro, parsed_cli_args, prepare_progress_bar};
-use crate::domain::{CrawlerState, SiteCrawlError};
+use crate::domain::CrawlerState;
 use crate::sitemap::generate_sitemap;
 use ansi_term::Colour;
 use rand::prelude::*;
@@ -31,6 +31,7 @@ use crawl::crawl_url;
 
 use tokio::time::sleep;
 
+use anyhow::{anyhow, Result};
 use reqwest::Client;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex};
@@ -39,17 +40,13 @@ use tokio::task::JoinSet;
 use url::Url;
 
 #[tokio::main]
-async fn main() -> Result<(), SiteCrawlError> {
+async fn main() -> Result<()> {
     log_intro();
     let args = parsed_cli_args();
-    let base_url = Url::parse(&args.url).map_err(|e| SiteCrawlError {
-        cause: e.to_string(),
-    })?;
+    let base_url = Url::parse(&args.url)?;
     let domain_name = base_url
         .domain()
-        .ok_or(SiteCrawlError {
-            cause: "Invalid domain name".to_string(),
-        })?
+        .ok_or(anyhow!("The provided domain to crawl was not valid"))?
         .to_owned();
 
     // Initialize shared state
@@ -68,10 +65,7 @@ async fn main() -> Result<(), SiteCrawlError> {
     let client = Client::builder()
         .timeout(Duration::from_secs(10))
         .user_agent("SimpleRustSitemapCrawler/0.1.0")
-        .build()
-        .map_err(|e| SiteCrawlError {
-            cause: e.to_string(),
-        })?;
+        .build()?;
 
     // Setup progress bar
     let pb = prepare_progress_bar();
@@ -159,14 +153,11 @@ async fn main() -> Result<(), SiteCrawlError> {
         total_crawled
     ));
 
-    // --- Generate Sitemap ---
     println!(
         "{} Generating sitemap.xml...",
         Colour::Cyan.bold().paint("->")
     );
-    generate_sitemap(state).map_err(|e| SiteCrawlError {
-        cause: e.to_string(),
-    })?;
+    generate_sitemap(state)?;
 
     println!(
         "\n{} {}",

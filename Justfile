@@ -17,10 +17,6 @@
 
 run:
     guix shell -f guix.scm -- inkaartbrenger --url https://jointhefreeworld.org
-    
-# run-wikimusic:
-#     cargo run -- --url https://wikimusic.jointhefreeworld.org    
-# run-byggsteg:
-#     cargo run -- --url https://byggsteg.jointhefreeworld.org    
+  
 run-artanis:
     cargo run -- --url https://artanis.dev
