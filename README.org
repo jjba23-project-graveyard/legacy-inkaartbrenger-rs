@@ -37,9 +37,32 @@ A ~guix.scm~ and ~manifest.scm~ are provided with the project, making it the int
 
 A ~Justfile~ is provided with the project, and it contains some common tasks and utilities, and can be useful to learn how to use this project.
 
-For the Nix crew, a flake is also provided.
+If you want to hack on the project with Guix, it's useful to have an ~.envrc~ with either ~use guix~.
 
-If you want to hack on the project, it's useful to have an ~.envrc~ with either ~use guix~ or ~use flake~.
+** Install with Cargo from a Local Project
+If you have the source code on your machine and are inside the project directory (where the Cargo.toml file is):
+
+#+begin_src shell
+cargo install --path .
+#+end_src
+
+** Install with Cargo from a Git Repository
+
+You can install directly from a remote Git URL without manually cloning it first:
+
+#+begin_src shell
+cargo install --git https://codeberg.org/jjba23/inkaartbrenger
+#+end_src
+
+** Installing with Guix
+
+The project contains a ~manifest.scm~ and a ~guix.scm~ with complete Guix integration.
+
+A quick way to install locally can be:
+#+begin_src shell
+sudo cp "$(guix build -f guix.scm -q)/bin/inkaartbrenger" ~/.local/bin/
+# or `just guix-install`
+#+end_src
 
 ** Command-Line Arguments
 

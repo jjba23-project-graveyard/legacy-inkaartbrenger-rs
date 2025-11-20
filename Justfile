@@ -20,3 +20,9 @@ run:
   
 run-artanis:
     cargo run -- --url https://artanis.dev
+
+guix-build:
+    guix build -f guix.scm -d
+    
+guix-install:
+    sudo cp "$(guix build -f guix.scm -q)/bin/inkaartbrenger" ~/.local/bin/
