@@ -12,7 +12,6 @@ If you like my work, please support me by [[https://bmc.link/jjbigorra][buying m
 
 --------------
 
-* ✨ Features
 - *Domain Scoped:* Only crawls links belonging to the initial base  domain, preventing accidental wandering across the web.
 - *Standard Sitemap:* Generates a valid =sitemap.xml= that is standards-compliant, at the root of the execution directory.
 - *Fast & Concurrent:* Uses Rust's asynchronous runtime (Tokio) and a  configurable number of concurrent tasks to crawl pages quickly.
