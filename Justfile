@@ -15,14 +15,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with inkaartbrenger.  If not, see <https://www.gnu.org/licenses/>.
 
-run:
-    guix shell -f guix.scm -- inkaartbrenger --url https://jointhefreeworld.org
+run-jointhefreeworld:
+    guix time-machine --channels=channels.scm -- \
+      shell -f guix.scm -- inkaartbrenger --url https://jointhefreeworld.org
   
-run-artanis:
-    cargo run -- --url https://artanis.dev
+dev-artanis:
+    guix time-machine --channels=channels.scm -- \
+      shell -m manifest.scm -- cargo run -- --url https://artanis.dev
 
 guix-build:
-    guix build -f guix.scm -d
+    guix time-machine --channels=channels.scm -- \
+      build -f guix.scm -d
     
 guix-install:
-    sudo cp "$(guix build -f guix.scm -q)/bin/inkaartbrenger" ~/.local/bin/
+    sudo cp "$(guix time-machine --channels=channels.scm -- build -f guix.scm -q)/bin/inkaartbrenger" ~/.local/bin/
