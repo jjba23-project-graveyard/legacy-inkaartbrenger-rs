@@ -29,16 +29,13 @@
   "guix.scm")
 
 (define rust-build-vars
-  (list "RUST_LOG=\"debug\"" "RUSTFLAGS=\"-C debuginfo=2 -C opt-level=1\""))
+  (list "RUST_LOG=\"debug\""))
 
 (define guix-time-machine-shell
   (list guix-time-machine "--" "shell -m" guix-manifest-file "--"))
 
 (define guix-time-machine-program-shell
   (list guix-time-machine "--" "shell -f" guix-package-file "--"))
-
-(define guix-derivation-file
-  ".inkaartbrenger.drv")
 
 (define (fmt)
   ($ (append rust-build-vars guix-time-machine-shell
@@ -56,19 +53,18 @@
      #:verbose? #t))
 
 (define (guix-package-build)
-  ($ (list (~ "rm -rfv ~a" guix-derivation-file)))
   ($ (append rust-build-vars
-             (list guix-time-machine "--" "build -f" guix-package-file
-                   (~ "-d -v 5 > ~a" guix-derivation-file)))
+             (list guix-time-machine "--" "build -f" guix-package-file "-d"))
+     #:verbose? #t))
 
-     #:verbose? #t)
-  ($ (list (~ "cat ~a" guix-derivation-file))))
+(define (cargo-release)
+  ($ (append rust-build-vars guix-time-machine-shell
+             (list "cargo build --profile=release"))
+     #:verbose? #t))
 
-(define (guix-install-to-local-bin)
-  (guix-package-build)
-  ($ (list "sudo cp -rv"
-           (~ "\"$(cat ~a)/bin/inkaartbrenger\"" guix-derivation-file)
-           "~/.local/bin/")
+(define (cargo-install)
+  (cargo-release)
+  ($ '("sudo cp -rv ./target/release/inkaartbrenger" "~/.local/bin/")
      #:verbose? #t))
 
 (define (verify)
@@ -76,8 +72,5 @@
   (guix-package-build)
   (cargo-jointhefreeworld)
   (guix-jointhefreeworld)
-  (guix-install-to-local-bin))
-
-;; guix-install:
-;;     sudo cp "$(guix time-machine --channels=channels.scm -- build -f guix.scm -q)/bin/inkaartbrenger" ~/.local/bin/
-
+  (cargo-release)
+  (cargo-install))

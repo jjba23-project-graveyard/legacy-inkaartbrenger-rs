@@ -31,7 +31,7 @@ use crawl::crawl_url;
 
 use tokio::time::sleep;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use reqwest::Client;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex};

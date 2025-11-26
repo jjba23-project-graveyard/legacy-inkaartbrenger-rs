@@ -19,7 +19,7 @@
 use crate::domain::CrawlerState;
 
 use ansi_term::Colour;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chrono::{DateTime, Utc};
 use reqwest::header::LAST_MODIFIED;
 use reqwest::{Client, Response};
