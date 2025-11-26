@@ -18,14 +18,12 @@
 (use-modules (guix packages)
              (gnu)
              (gnu packages rust)
-             (gnu packages commencement)             
              (gnu packages tls)
              (gnu packages pkg-config))
 
 (packages->manifest (list openssl
                           pkg-config
                           rust
-                          gcc-toolchain
                           (list rust "cargo")
                           (list rust "tools")
                           rust-analyzer))

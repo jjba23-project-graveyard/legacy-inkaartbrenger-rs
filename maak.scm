@@ -29,7 +29,7 @@
   "guix.scm")
 
 (define rust-build-vars
-  (list "RUST_LOG=\"debug\""))
+  (list "RUST_LOG=\"debug\"" "OPENSSL_NO_VENDOR=1"))
 
 (define guix-time-machine-shell
   (list guix-time-machine "--" "shell -m" guix-manifest-file "--"))
