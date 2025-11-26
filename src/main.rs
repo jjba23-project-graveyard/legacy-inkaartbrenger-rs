@@ -110,7 +110,7 @@ async fn main() -> Result<()> {
                 let mut nums: Vec<u64> = (1..300).collect();
                 nums.shuffle(&mut rng);
                 let random_jitter_millis = nums.choose(&mut rng).unwrap_or(&50);
-                let task_initial_delay = Duration::from_millis(250 + random_jitter_millis);
+                let task_initial_delay = Duration::from_millis(120 + random_jitter_millis);
 
                 tasks.spawn(async move {
                     sleep(task_initial_delay).await;

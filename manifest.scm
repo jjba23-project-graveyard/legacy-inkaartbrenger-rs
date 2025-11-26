@@ -24,6 +24,7 @@
 (packages->manifest (list openssl
                           pkg-config
                           rust
+                          gcc
                           (list rust "cargo")
                           (list rust "tools")
                           rust-analyzer))
