@@ -17,8 +17,11 @@
 
 [package]
 name = "inkaartbrenger"
-version = "0.1.0"
+version = "0.1.8"
 edition = "2024"
+authors = ["Josep Bigorra <jjbigorra@gmail.com>"]
+description = "Web crawling Sitemap generator written in Rust."
+license = "AGPL-3.0-or-later"
 
 [profile.dev]
 incremental = true

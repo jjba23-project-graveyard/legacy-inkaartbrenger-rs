@@ -67,6 +67,10 @@
   ($ '("sudo cp -rv ./target/release/inkaartbrenger" "~/.local/bin/")
      #:verbose? #t))
 
+(define (build)
+  "Alias for cargo-release."
+  (cargo-release))
+
 (define (verify)
   (fmt)
   (guix-package-build)
