@@ -17,7 +17,7 @@
 
 [package]
 name = "inkaartbrenger"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2024"
 authors = ["Josep Bigorra <jjbigorra@gmail.com>"]
 description = "Web crawling Sitemap generator written in Rust."
@@ -69,3 +69,5 @@ tokio-retry2 = "0.6"
 anyhow = "1.0.100"
 # Random
 rand = "0.9.2"
+# OpenSSL
+openssl = { version = "0.10", features = ["vendored"] }
