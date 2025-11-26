@@ -18,6 +18,7 @@
 (use-modules (guix packages)
              (gnu)
              (gnu packages rust)
+             (gnu packages gcc)             
              (gnu packages tls)
              (gnu packages pkg-config))
 
